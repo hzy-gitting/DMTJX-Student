@@ -39,6 +39,8 @@ private slots:
     void rtcpRDRD();
     void fileDataRDRD();
     void rtcpError(QAbstractSocket::SocketError socketError);
+    void on_commitFileBtn_clicked();
+
 private:
     Ui::Widget *ui;
     QUdpSocket *us,*usdet,*usVideo;

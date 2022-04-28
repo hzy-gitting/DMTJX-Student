@@ -15,7 +15,7 @@
 #include<Windows.h>
 #include<QMessageBox>
 #include"filereceiver.h"
-
+#include"commitfilewindow.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -398,3 +398,11 @@ bool Widget::detectReply(){
     }
     return true;
 }
+
+//学生提交作业给教师端（上传文件）
+void Widget::on_commitFileBtn_clicked()
+{
+    CommitFileWindow *cfw = new CommitFileWindow;
+    cfw->show();
+}
+

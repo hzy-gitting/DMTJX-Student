@@ -158,6 +158,19 @@
     <string>传输速度</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="commitFileBtn">
+   <property name="geometry">
+    <rect>
+     <x>680</x>
+     <y>330</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>提交作业</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

@@ -18,6 +18,7 @@ LIBS += -LC:\Users\hzy\Desktop\ffmpeg_win64_dev\lib -lavcodec -lavdevice -lavfor
 LIBS += -LC:\Users\hzy\Desktop\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x64 -lsdl
 
 SOURCES += \
+    commitfilewindow.cpp \
     ffmpegDecoder.cpp \
     filedatahandler.cpp \
     filercvwindow.cpp \
@@ -25,12 +26,14 @@ SOURCES += \
     main.cpp \
     netmessage.cpp \
     networkdatahandler.cpp \
+    rtcp.cpp \
     stumsgwindow.cpp \
     videodatabuffer.cpp \
     widget.cpp \
 
 HEADERS += \
     SDLMaster.h \
+    commitfilewindow.h \
     ffmpeg.h \
     ffmpegDecoder.h \
     filedatahandler.h \
@@ -38,11 +41,13 @@ HEADERS += \
     filereceiver.h \
     netmessage.h \
     networkdatahandler.h \
+    rtcp.h \
     stumsgwindow.h \
     videodatabuffer.h \
     widget.h
 
 FORMS += \
+    commitfilewindow.ui \
     filercvwindow.ui \
     stumsgwindow.ui \
     widget.ui
