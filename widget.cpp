@@ -16,6 +16,7 @@
 #include<QMessageBox>
 #include"filereceiver.h"
 #include"commitfilewindow.h"
+#include"rtcp.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -81,10 +82,6 @@ Widget::Widget(QWidget *parent)
     rtcp->listen(QHostAddress::Any,8888);
     connect(rtcp,&QTcpServer::newConnection,this,&Widget::tcconn);
 
-
-    rtcpSkt = new QTcpSocket;
-    connect(rtcpSkt,&QTcpSocket::readyRead,this,&Widget::rtcpRDRD);
-    connect(rtcpSkt,&QTcpSocket::errorOccurred,this,&Widget::rtcpError);
 
     isReceiving = false;
     fileSize = 0;
@@ -164,7 +161,9 @@ void Widget::usdetreadyread(){
                 teacherAddr = addr;
                 teacherPort = port;
                 qDebug()<<"教师端ip:"<<teacherAddr<<"端口："<<teacherPort;
-                rtcpSkt->connectToHost(teacherAddr,8999);
+                StudentNS::RTCP *rtcp = StudentNS::RTCP::getInstance();
+                rtcp->connectToTeacher(teacherAddr,8999);
+
                 qDebug()<<"已收到探测包";
 
                 //回应探测
@@ -179,53 +178,7 @@ void Widget::rtcpError(QAbstractSocket::SocketError socketError){
     qDebug()<<"rtcpError: "<<socketError;
 }
 
-struct fileToRcvTask{
-    QList<QString> fileList;
-    QList<qint64> fileSizeList;
-};
 
-void Widget::rtcpRDRD(){
-    QDataStream in(rtcpSkt);
-    in.setVersion(QDataStream::Qt_5_1);
-    QString cmd;
-    QByteArray payload;
-    in.startTransaction();
-    in >>cmd;   //读取命令字段
-    in >> payload;  //读取数据体（负载）
-    qDebug()<<"cmd="<<cmd;
-    if(!in.commitTransaction()){
-        qDebug()<<"commitTransaction fail";
-        return;
-    }
-    if(cmd == "fileRcv"){//准备接收文件
-        fileToRcvTask frt;
-        qsizetype fileNum;  //文件个数
-        QDataStream inData(payload);
-        inData >> fileNum;
-        qDebug()<<"准备接收文件 数量="<<fileNum;
-        QString fileName;
-        qint64 fileSize;
-        for(int i=0;i<fileNum;i++){
-            inData >> fileName;
-            inData >> fileSize;
-            frt.fileList.append(fileName);
-            frt.fileSizeList.append(fileSize);
-            qDebug()<<"文件名："<<fileName<<" 大小="<<fileSize;
-        }
-        frcver = new FileReceiver(frt.fileList,frt.fileSizeList);
-    }
-    else if(cmd == "fileData"){//文件数据
-        qDebug()<<"收到文件数据";
-        frcver->writeFile(payload);
-    }
-    if(rtcpSkt->bytesAvailable()){
-        rtcpRDRD();
-    }
-}
-void Widget::fileDataRDRD(){
-    QTcpSocket *s = (QTcpSocket*)sender();
-
-}
 //教师机连接上来
 void Widget::tcconn(){
     qDebug()<<"teacher conn";
@@ -289,9 +242,6 @@ void Widget::readyread(){
 void Widget::paintEvent(QPaintEvent *event){//1-2ms 渲染
 
     QPainter painter(this);
-    painter.drawLine(0,0,100,100);
-    screen.setDevicePixelRatio(1.25);
-    painter.drawPixmap(0,0,screen);
 
 }
 //tcp读取

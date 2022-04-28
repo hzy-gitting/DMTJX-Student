@@ -36,8 +36,7 @@ private slots:
     void rtcpReadyRead();
     void usdetreadyread();
     void usVideoreadyread();
-    void rtcpRDRD();
-    void fileDataRDRD();
+
     void rtcpError(QAbstractSocket::SocketError socketError);
     void on_commitFileBtn_clicked();
 
