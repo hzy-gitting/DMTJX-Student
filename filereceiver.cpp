@@ -1,5 +1,6 @@
 #include "filereceiver.h"
 #include"filercvwindow.h"
+#include<QDir>
 
 FileReceiver::FileReceiver(QObject *parent) : QObject(parent)
 {
@@ -14,6 +15,13 @@ FileReceiver::FileReceiver(QList<QString> fileList,QList<qint64> fileSizeList){
         fr.name = fileName.sliced(fileName.lastIndexOf('/')+1);
         fr.size = fileSizeList.at(i);
         fr.sizeLeft = fr.size;
+        QDir rcvDir;
+        rcvDir.setPath("E:/test");
+        if(!rcvDir.exists()){
+            if(!rcvDir.mkpath("E:/test")){
+                qDebug()<<"创建"<<rcvDir.path()<<"失败";
+            }
+        }
         fr.f = new QFile("E:/test/"+fr.name);
         if(!fr.f->open(QIODevice::WriteOnly)){
             qDebug()<<"打开"<<fr.f->fileName()<<"失败";

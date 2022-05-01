@@ -17,7 +17,12 @@ private:
     QTcpSocket *rtcpSocket;     //学生端与教师端关联的套接字，用于发送RTCP协议数据包
 
     static RTCP *pInst;
-    int status;     //状态
+
+    enum RTCP_STATUS{
+        Unconnected,
+        Connected,
+    }status;
+
     FileReceiver *frcver;
 private:
     RTCP();
@@ -35,10 +40,16 @@ public:
 
     QHostAddress getTeacherIpAddr();
 
+    quint16 getTeacherPort();
+
+    RTCP_STATUS getStatus();
+
     bool connectToTeacher(QHostAddress teacherAddr,quint16 teacherPort);
 
-    int getStatus();
+
+
 signals:
+    void statusChanged();   //rtcp状态改变信号
 
 private slots:
     void slotConnected();

@@ -9,6 +9,7 @@ private:
     QString content;        //消息内容
     QDateTime dateTime;     //发送的日期时间
     QHostAddress senderAddr;//发送者的主机地址
+    bool isSelf;             //这条消息是否是自己发送的
 
 public:
     NetMessage();

@@ -302,8 +302,9 @@ void Widget::on_bindButton_clicked()
 {
     //us->bind(QHostAddress(ui->ipEdit->text()),ui->portEdit->text().toInt());
     //f.close();
-    ffmpeg_init();
-    x264Decoder *dec = new x264Decoder(&vdb);
+    qDebug()<<"asd";
+    ffmpeg_init();qDebug()<<"dasfasfca";
+    x264Decoder *dec = new x264Decoder(&vdb);qDebug()<<"wefwe";
     QMessageBox::information(this,"sad","x264Decoder() ret");
     dec->ReadFrame();
     QMessageBox::information(this,"sad","bindclick ret");

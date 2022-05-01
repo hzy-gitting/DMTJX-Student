@@ -9,10 +9,11 @@ StudentNS::RTCP::RTCP()
 
 void StudentNS::RTCP::init()
 {
-    status = 0;
+    status = Unconnected;
     rtcpSocket = new QTcpSocket;
     connect(rtcpSocket,&QTcpSocket::connected,this,&StudentNS::RTCP::slotConnected);
     connect(rtcpSocket,&QTcpSocket::readyRead,this,&StudentNS::RTCP::rtcpRDRD);
+    connect(rtcpSocket,&QTcpSocket::errorOccurred,this,&StudentNS::RTCP::rtcpError);
 }
 
 StudentNS::RTCP *StudentNS::RTCP::getInstance()
@@ -61,22 +62,28 @@ QHostAddress StudentNS::RTCP::getTeacherIpAddr()
     return rtcpSocket->peerAddress();   //返回套接字对端ip地址，即为教师ip地址
 }
 
+quint16 StudentNS::RTCP::getTeacherPort()
+{
+    return rtcpSocket->peerPort();
+}
+
+StudentNS::RTCP::RTCP_STATUS StudentNS::RTCP::getStatus()
+{
+    return status;
+}
+
 bool StudentNS::RTCP::connectToTeacher(QHostAddress teacherAddr,quint16 teacherPort)
 {
     rtcpSocket->connectToHost(teacherAddr,teacherPort);
     return true;
 }
-
-int StudentNS::RTCP::getStatus()
-{
-    return status;
-}
-
 void StudentNS::RTCP::slotConnected(){
     qDebug()<<"成功连接到教师端RTCP ip="<<getTeacherIpAddr();
+    status = Connected;
 }
 
-
+//将数据包打包，放到待处理队列中
+//由各个消息handler进行具体的处理
 void StudentNS::RTCP::rtcpRDRD(){
     QDataStream in(rtcpSocket);
     in.setVersion(QDataStream::Qt_5_1);
@@ -111,6 +118,11 @@ void StudentNS::RTCP::rtcpRDRD(){
     else if(cmd == "fileData"){//文件数据
         qDebug()<<"收到文件数据";
         frcver->writeFile(payload);
+    }
+    else if(cmd == "msg"){
+        qDebug()<<"收到网络消息";
+        //将消息保存到一个容器，容器触发新消息信号通知界面刷新显示
+
     }
     if(rtcpSocket->bytesAvailable()){
         rtcpRDRD();

@@ -26,6 +26,7 @@ SOURCES += \
     main.cpp \
     netmessage.cpp \
     networkdatahandler.cpp \
+    networkmessagelist.cpp \
     rtcp.cpp \
     stumsgwindow.cpp \
     videodatabuffer.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
     filereceiver.h \
     netmessage.h \
     networkdatahandler.h \
+    networkmessagelist.h \
     rtcp.h \
     stumsgwindow.h \
     videodatabuffer.h \
