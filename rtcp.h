@@ -50,6 +50,7 @@ public:
 
 signals:
     void statusChanged();   //rtcp状态改变信号
+    void sigNewMessage(const QByteArray&msgContent,const QHostAddress &senderAddr);   //rtcp新消息信号
 
 private slots:
     void slotConnected();

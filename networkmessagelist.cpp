@@ -1,8 +1,17 @@
 #include "networkmessagelist.h"
+NetworkMessageList *NetworkMessageList::pInst = NULL;
 
 NetworkMessageList::NetworkMessageList(QObject *parent) : QObject(parent)
 {
 
+}
+
+NetworkMessageList *NetworkMessageList::getInstance()
+{
+    if(!pInst){
+        pInst = new NetworkMessageList;
+    }
+    return pInst;
 }
 
 void NetworkMessageList::insertMessage(const NetMessage &msg)
@@ -21,4 +30,15 @@ void NetworkMessageList::clearMessage()
 QList<NetMessage> NetworkMessageList::getAllMessage()
 {
     return msgList;
+}
+
+void NetworkMessageList::slotNewMessage(const QByteArray &payload,const QHostAddress &senderAddr)
+{
+    qDebug()<<__FUNCTION__;
+    NetMessage msg;
+    msg.setContent(QString::fromUtf8(payload));
+    msg.setDateTime(QDateTime::currentDateTime());
+    msg.setSenderAddr(senderAddr);
+    insertMessage(msg);
+    qDebug()<<__FUNCTION__<<" end";
 }

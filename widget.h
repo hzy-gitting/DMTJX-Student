@@ -10,6 +10,7 @@
 #include<QBuffer>
 #include"videodatabuffer.h"
 #include"filereceiver.h"
+#include"NetworkMessageList.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -40,12 +41,13 @@ private slots:
     void rtcpError(QAbstractSocket::SocketError socketError);
     void on_commitFileBtn_clicked();
 
+    void slotNewMessage();
 private:
     Ui::Widget *ui;
     QUdpSocket *us,*usdet,*usVideo;
     QTcpServer *tserv;
     QTcpSocket *rtcpSkt;
-
+    NetworkMessageList *nm;
 
     bool isReceiving;
     qint64 fileSize;

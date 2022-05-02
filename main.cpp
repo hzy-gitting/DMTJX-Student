@@ -1,7 +1,9 @@
 #include "widget.h"
-
+#include<QObject>
 #include <QApplication>
 #include"rtcp.h"
+#include"networkmessagelist.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -9,6 +11,10 @@ int main(int argc, char *argv[])
     setbuf(stdout, NULL);
 
     StudentNS::RTCP::start();
+    StudentNS::RTCP*rtcp = StudentNS::RTCP::getInstance();
+    NetworkMessageList *nm = NetworkMessageList::getInstance();
+    QObject::connect(rtcp,&StudentNS::RTCP::sigNewMessage,
+            nm,&NetworkMessageList::slotNewMessage);
 
     Widget w;
     w.show();

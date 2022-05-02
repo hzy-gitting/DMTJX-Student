@@ -9,13 +9,18 @@
 class NetworkMessageList : public QObject
 {
     Q_OBJECT
-public:
+
+private:
+    static NetworkMessageList *pInst;
+
     explicit NetworkMessageList(QObject *parent = nullptr);
 
 private:
     QList<NetMessage> msgList;
 
 public:
+    static NetworkMessageList *getInstance();
+
     void insertMessage(const NetMessage &msg);
     void clearMessage();
 
@@ -24,7 +29,8 @@ public:
     void save();
 
     void attach(QObject *ui);
-
+public slots:
+    void slotNewMessage(const QByteArray&payload,const QHostAddress &senderAddr);
 signals:
     void newMessage();
     void sigClearMessage();

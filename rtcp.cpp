@@ -1,4 +1,5 @@
 #include "rtcp.h"
+#include"networkmessagelist.h"
 
 StudentNS::RTCP * StudentNS::RTCP::pInst = nullptr;
 
@@ -13,7 +14,7 @@ void StudentNS::RTCP::init()
     rtcpSocket = new QTcpSocket;
     connect(rtcpSocket,&QTcpSocket::connected,this,&StudentNS::RTCP::slotConnected);
     connect(rtcpSocket,&QTcpSocket::readyRead,this,&StudentNS::RTCP::rtcpRDRD);
-    connect(rtcpSocket,&QTcpSocket::errorOccurred,this,&StudentNS::RTCP::rtcpError);
+    //connect(rtcpSocket,&QTcpSocket::errorOccurred,this,&StudentNS::RTCP::rtcpError);
 }
 
 StudentNS::RTCP *StudentNS::RTCP::getInstance()
@@ -121,8 +122,8 @@ void StudentNS::RTCP::rtcpRDRD(){
     }
     else if(cmd == "msg"){
         qDebug()<<"收到网络消息";
-        //将消息保存到一个容器，容器触发新消息信号通知界面刷新显示
-
+        //将消息信号传递给消息模块来处理
+        emit sigNewMessage(payload,rtcpSocket->peerAddress());
     }
     if(rtcpSocket->bytesAvailable()){
         rtcpRDRD();

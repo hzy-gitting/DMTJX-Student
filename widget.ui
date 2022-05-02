@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>学生端</string>
   </property>
-  <widget class="QTextEdit" name="textEdit">
+  <widget class="QTextEdit" name="msgRcvEdit">
    <property name="geometry">
     <rect>
      <x>170</x>

@@ -17,6 +17,7 @@
 #include"filereceiver.h"
 #include"commitfilewindow.h"
 #include"rtcp.h"
+#include"networkmessagelist.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -37,6 +38,9 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+
+    nm = NetworkMessageList::getInstance();
+    connect(nm,&NetworkMessageList::newMessage,this,&Widget::slotNewMessage);
 
     /*ffmpeg_init();
     x264Decoder dec(&vdb);
@@ -105,7 +109,27 @@ Widget::~Widget()
 {
     delete ui;
 }
+void Widget::slotNewMessage(){
+    qDebug()<<__FUNCTION__;
+    QList< NetMessage> msgList =  nm->getAllMessage();
+    qDebug()<<"getAllMessage";
+    QString ss;
+    NetMessage msg;
+    for(int i=0;i<msgList.size();i++){
+        const NetMessage &msg = msgList.at(i);
+        ss+="老师(";
+        ss+=msg.getSenderAddr().toString();
+        ss+=") ";
+        ss+=msg.getDateTime().toString("yyyy-MM-dd HH:mm:ss");
+        ss+="\n    ";
+        ss+=msg.getContent();
+        ss+="\n";
+    }
+    ui->msgRcvEdit->setPlainText(ss);
+    ui->msgRcvEdit->moveCursor(QTextCursor::End);
+qDebug()<<__FUNCTION__ <<" end";
 
+}
 //视频端口接收到数据
 //*****************问题：缓冲区溢出，部分数据被丢弃
 void Widget::usVideoreadyread(){
