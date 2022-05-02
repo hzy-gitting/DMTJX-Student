@@ -20,6 +20,8 @@ private slots:
 
     void on_commitBtn_clicked();
 
+    void on_closeBtn_clicked();
+
 private:
     Ui::CommitFileWindow *ui;
 

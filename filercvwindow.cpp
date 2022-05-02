@@ -46,7 +46,6 @@ void FileRcvWindow::updateFileRcvProgress(int n,qint64 sizeLeft){
 
 void FileRcvWindow::on_openDirBtn_clicked()
 {
-    qDebug()<<"打开目录。。。";
     ShellExecuteA(NULL,"open",NULL,NULL,"E:/test",SW_SHOWNORMAL);
 }
 

@@ -53,6 +53,7 @@ void CommitFileWindow::on_commitBtn_clicked()
 
     if(!rtcp->sendFileRcvCommand(fileList,fileSizeList)){
         qDebug()<<"sendFileRcvCommand faIl";
+        QMessageBox::information(NULL,"提示","发送文件传输命令失败");
         return;
     }
     //连接成功后，发送内容
@@ -64,6 +65,7 @@ void CommitFileWindow::on_commitBtn_clicked()
         f.setFileName(fileList.at(i));
         if(!f.open(QIODevice::ReadOnly)){
             qDebug()<<"fopen fail";
+            QMessageBox::information(NULL,"提示","打开文件"+f.fileName()+" 数据失败");
             delete[]data;
             return;
         }
@@ -71,11 +73,16 @@ void CommitFileWindow::on_commitBtn_clicked()
             qint64 n = f.read(data,blockSize);
             if(-1 == n){
                 qDebug()<<"read file fail";
+                delete[]data;
+                QMessageBox::information(NULL,"提示","读取文件"+f.fileName()+" 数据失败");
+                return;
             }
             qDebug()<<"read file n="<<n;
             fdata.setRawData(data,n);
             if(!rtcp->sendFileData(fdata)){
                 qDebug()<<"sendFileData faIl";
+                delete[]data;
+                QMessageBox::information(NULL,"提示","发送文件数据失败");
                 return;
             }
             QGuiApplication::processEvents();
@@ -87,5 +94,11 @@ void CommitFileWindow::on_commitBtn_clicked()
     qDebug()<<"作业提交完毕！";
     ui->commitBtn->setEnabled(true);    //重新启用按钮
     QMessageBox::information(NULL,"提示","作业提交成功");
+}
+
+
+void CommitFileWindow::on_closeBtn_clicked()
+{
+    close();
 }
 

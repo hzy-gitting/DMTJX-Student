@@ -1,5 +1,6 @@
 #include "rtcp.h"
 #include"networkmessagelist.h"
+#include<QMessageBox>
 
 StudentNS::RTCP * StudentNS::RTCP::pInst = nullptr;
 
@@ -82,6 +83,7 @@ void StudentNS::RTCP::slotConnected(){
     qDebug()<<"成功连接到教师端RTCP ip="<<getTeacherIpAddr();
     status = Connected;
 }
+bool MySystemShutDown();
 
 //将数据包打包，放到待处理队列中
 //由各个消息handler进行具体的处理
@@ -125,7 +127,40 @@ void StudentNS::RTCP::rtcpRDRD(){
         //将消息信号传递给消息模块来处理
         emit sigNewMessage(payload,rtcpSocket->peerAddress());
     }
+    else if(cmd == "shutdown"){
+        if(!MySystemShutDown()){
+            QMessageBox::information(NULL,"提示","关机失败");
+        }
+    }
     if(rtcpSocket->bytesAvailable()){
         rtcpRDRD();
     }
 }
+
+
+#include <windows.h>
+#pragma comment(lib,"user32.lib")
+bool MySystemShutDown()
+{
+    HANDLE hToken;
+    TOKEN_PRIVILEGES tkp;
+
+    //获取进程标志
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+         return false;
+
+    //获取关机特权的LUID
+    LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME,    &tkp.Privileges[0].Luid);
+    tkp.PrivilegeCount = 1;
+    tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+    //获取这个进程的关机特权
+    AdjustTokenPrivileges(hToken, false, &tkp, 0, (PTOKEN_PRIVILEGES)NULL, 0);
+    if (GetLastError() != ERROR_SUCCESS) return false;
+
+    // 强制关闭计算机
+    if ( !ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCE, 0))
+          return false;
+    return true;
+}
+
