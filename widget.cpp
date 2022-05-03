@@ -18,6 +18,8 @@
 #include"commitfilewindow.h"
 #include"rtcp.h"
 #include"networkmessagelist.h"
+#include<QCloseEvent>
+
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -268,6 +270,15 @@ void Widget::paintEvent(QPaintEvent *event){//1-2ms 渲染
     QPainter painter(this);
 
 }
+//重写关闭事件处理
+void Widget::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::information(NULL,"提示","closeEvent");
+    qDebug()<<"close event";
+    QApplication::exit();
+
+    QMessageBox::information(NULL,"提示","exit");
+}
 //tcp读取
 void Widget::tcpReadyread(){
     qDebug()<<"tcp serv read";
@@ -380,4 +391,3 @@ void Widget::on_commitFileBtn_clicked()
     CommitFileWindow *cfw = new CommitFileWindow;
     cfw->show();
 }
-

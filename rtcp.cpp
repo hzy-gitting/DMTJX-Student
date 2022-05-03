@@ -1,6 +1,7 @@
 #include "rtcp.h"
 #include"networkmessagelist.h"
 #include<QMessageBox>
+#include"SDL.h"
 
 StudentNS::RTCP * StudentNS::RTCP::pInst = nullptr;
 
@@ -83,7 +84,7 @@ void StudentNS::RTCP::slotConnected(){
     qDebug()<<"成功连接到教师端RTCP ip="<<getTeacherIpAddr();
     status = Connected;
 }
-bool MySystemShutDown();
+bool MySystemShutDown(bool bRestart = false);
 
 //将数据包打包，放到待处理队列中
 //由各个消息handler进行具体的处理
@@ -132,6 +133,17 @@ void StudentNS::RTCP::rtcpRDRD(){
             QMessageBox::information(NULL,"提示","关机失败");
         }
     }
+    else if(cmd == "restart"){
+        if(!MySystemShutDown(true)){
+            QMessageBox::information(NULL,"提示","重启失败");
+        }
+    }
+    else if(cmd == "startScreenShare"){//屏幕共享开始
+
+    }
+    else if(cmd == "stopScreenShare"){//屏幕共享结束
+        SDL_Quit();
+    }
     if(rtcpSocket->bytesAvailable()){
         rtcpRDRD();
     }
@@ -140,7 +152,8 @@ void StudentNS::RTCP::rtcpRDRD(){
 
 #include <windows.h>
 #pragma comment(lib,"user32.lib")
-bool MySystemShutDown()
+//bRestart为真时，重启计算机，否则关闭计算机
+bool MySystemShutDown(bool bRestart)
 {
     HANDLE hToken;
     TOKEN_PRIVILEGES tkp;
@@ -158,8 +171,14 @@ bool MySystemShutDown()
     AdjustTokenPrivileges(hToken, false, &tkp, 0, (PTOKEN_PRIVILEGES)NULL, 0);
     if (GetLastError() != ERROR_SUCCESS) return false;
 
-    // 强制关闭计算机
-    if ( !ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCE, 0))
+    UINT flag;
+    if(bRestart){
+        flag = EWX_REBOOT;
+    }else{
+        flag = EWX_SHUTDOWN;
+    }
+    // 强制关闭/重启计算机
+    if ( !ExitWindowsEx(flag | EWX_FORCE, 0))
           return false;
     return true;
 }

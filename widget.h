@@ -71,5 +71,8 @@ private:
 signals:
     void msgReceive(QString msg);
 
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 #endif // WIDGET_H

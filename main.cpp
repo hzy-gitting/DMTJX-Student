@@ -3,6 +3,7 @@
 #include <QApplication>
 #include"rtcp.h"
 #include"networkmessagelist.h"
+#include<QMessageBox>
 
 
 int main(int argc, char *argv[])
@@ -18,5 +19,9 @@ int main(int argc, char *argv[])
 
     Widget w;
     w.show();
-    return a.exec();
+    a.exec();
+
+    qDebug()<<"学生端消息循环退出";
+    QMessageBox::information(NULL,"提示","学生端消息循环退出");
+    return 0;
 }
