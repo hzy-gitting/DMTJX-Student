@@ -18,10 +18,6 @@ private:
 
     static RTCP *pInst;
 
-    enum RTCP_STATUS{
-        Unconnected,
-        Connected,
-    }status;
 
     FileReceiver *frcver;
 private:
@@ -29,20 +25,32 @@ private:
     void init();
 
 public:
+    enum RTCP_STATUS{
+        Unconnected,
+        Connected,
+        Disconnected,
+        Error,
+    }status;
 
     static RTCP * getInstance();    //获取单例
 
     bool sendFileRcvCommand(QList<QString> fileList,QList<qint64> fileSizeList);
 
     bool sendFileData(QByteArray data);
+    bool sendMessage(QByteArray data);
 
     static void start();
 
     QHostAddress getTeacherIpAddr();
 
     quint16 getTeacherPort();
+    QHostAddress getLocalIpAddr();
+
+    quint16 getLocalPort();
 
     RTCP_STATUS getStatus();
+
+    QString getErrorString();
 
     bool connectToTeacher(QHostAddress teacherAddr,quint16 teacherPort);
 
@@ -56,6 +64,7 @@ signals:
 private slots:
     void slotConnected();
     void rtcpRDRD();
+    void rtcpError(QAbstractSocket::SocketError socketError);
 };
 }
 #endif // RTCP_H

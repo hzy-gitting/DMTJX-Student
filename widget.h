@@ -11,6 +11,7 @@
 #include"videodatabuffer.h"
 #include"filereceiver.h"
 #include"NetworkMessageList.h"
+#include"rtcp.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -32,10 +33,13 @@ private slots:
     void on_commitFileBtn_clicked();
 
     void slotNewMessage();
+    void on_sendMsgBtn_clicked();
+
+    void slotRTCPStatusChanged();
 private:
     Ui::Widget *ui;
 
-    QUdpSocket *usdet,*usVideo;
+    QUdpSocket *usdet;
 
     NetworkMessageList *nm;
 
@@ -44,10 +48,10 @@ private:
 
     void paintEvent(QPaintEvent *event) override;
     StuMsgWindow *smw;
-
-    VideoDataBuffer vdb;    //视频数据缓冲区
+    StudentNS::RTCP *rtcp;
 
     // QWidget interface
+    void updateRTCPStatusText();
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

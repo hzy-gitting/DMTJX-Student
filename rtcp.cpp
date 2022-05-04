@@ -19,7 +19,7 @@ void StudentNS::RTCP::init()
     rtcpSocket = new QTcpSocket;
     connect(rtcpSocket,&QTcpSocket::connected,this,&StudentNS::RTCP::slotConnected);
     connect(rtcpSocket,&QTcpSocket::readyRead,this,&StudentNS::RTCP::rtcpRDRD);
-    //connect(rtcpSocket,&QTcpSocket::errorOccurred,this,&StudentNS::RTCP::rtcpError);
+    connect(rtcpSocket,&QTcpSocket::errorOccurred,this,&StudentNS::RTCP::rtcpError);
 }
 
 StudentNS::RTCP *StudentNS::RTCP::getInstance()
@@ -55,7 +55,18 @@ bool StudentNS::RTCP::sendFileData( QByteArray data)
 
     return true;
 }
+//发送网络消息
+bool StudentNS::RTCP::sendMessage(QByteArray data)
+{
+    QDataStream out(rtcpSocket);
+    out.setVersion(QDataStream::Qt_5_1);
 
+    out << QString("msg");//命令字段
+    out << data;
+    out.device()->waitForBytesWritten(3000);
+
+    return true;
+}
 void StudentNS::RTCP::start()
 {
     if(pInst == nullptr){
@@ -73,9 +84,24 @@ quint16 StudentNS::RTCP::getTeacherPort()
     return rtcpSocket->peerPort();
 }
 
+QHostAddress StudentNS::RTCP::getLocalIpAddr()
+{
+    return rtcpSocket->localAddress();
+}
+
+quint16 StudentNS::RTCP::getLocalPort()
+{
+    return rtcpSocket->localPort();
+}
+
 StudentNS::RTCP::RTCP_STATUS StudentNS::RTCP::getStatus()
 {
     return status;
+}
+
+QString StudentNS::RTCP::getErrorString()
+{
+    return rtcpSocket->errorString();
 }
 
 bool StudentNS::RTCP::connectToTeacher(QHostAddress teacherAddr,quint16 teacherPort)
@@ -86,6 +112,18 @@ bool StudentNS::RTCP::connectToTeacher(QHostAddress teacherAddr,quint16 teacherP
 void StudentNS::RTCP::slotConnected(){
     qDebug()<<"成功连接到教师端RTCP ip="<<getTeacherIpAddr();
     status = Connected;
+    emit statusChanged();
+}
+
+void StudentNS::RTCP::rtcpError(QAbstractSocket::SocketError socketError){
+    qDebug()<<"StudentNS::RTCP::rtcpError="<<socketError<<"str:"<<rtcpSocket->errorString();
+    if(socketError == QAbstractSocket::RemoteHostClosedError){
+        status = Disconnected;
+        emit statusChanged();
+    }else{
+        status = Error;
+        emit statusChanged();
+    }
 }
 bool MySystemShutDown(bool bRestart = false);
 
