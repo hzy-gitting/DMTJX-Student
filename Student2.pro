@@ -28,6 +28,7 @@ SOURCES += \
     networkdatahandler.cpp \
     networkmessagelist.cpp \
     rtcp.cpp \
+    screensharethread.cpp \
     stumsgwindow.cpp \
     videodatabuffer.cpp \
     widget.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
     networkdatahandler.h \
     networkmessagelist.h \
     rtcp.h \
+    screensharethread.h \
     stumsgwindow.h \
     videodatabuffer.h \
     widget.h

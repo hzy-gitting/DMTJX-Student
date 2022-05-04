@@ -8,8 +8,6 @@ StuMsgWindow::StuMsgWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect((Widget*)parent,&Widget::msgReceive,this,&StuMsgWindow::msgAdd);
-
 }
 
 StuMsgWindow::~StuMsgWindow()

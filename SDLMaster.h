@@ -29,7 +29,7 @@ namespace SDLMaster
 			event.type = SFM_REFRESH_EVENT;
 			SDL_PushEvent(&event);
 			SDL_Delay(40);
-		}
+        }
 		return 0;
 	}
 
@@ -42,19 +42,19 @@ namespace SDLMaster
 		
 		int screen_w = width, screen_h = height;
 		SDL_Surface *screen;
-		screen = SDL_SetVideoMode(screen_w, screen_h, 0, 0);
+        screen = SDL_SetVideoMode(screen_w , screen_h, 0, 0);
 		if (!screen) 
 		{
 			printf("SDL: could not set video mode - exiting:%s\n", SDL_GetError());
 			return ;
 		}
-		bmp = SDL_CreateYUVOverlay(width, height, SDL_IYUV_OVERLAY, screen);
+        bmp = SDL_CreateYUVOverlay(width, height, SDL_IYUV_OVERLAY    , screen);
 		rect.x = 0;
 		rect.y = 0;
-		rect.w = screen_w;
-		rect.h = screen_h;
+        rect.w = screen_w;
+        rect.h = screen_h;
 
-		SDL_Thread *video_tid = SDL_CreateThread(sfp_refresh_thread, NULL);
+        //SDL_Thread *video_tid = SDL_CreateThread(sfp_refresh_thread, NULL);
 		SDL_WM_SetCaption("Desktop Player", NULL);
 	}
 

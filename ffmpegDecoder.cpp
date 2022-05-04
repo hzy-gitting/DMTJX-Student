@@ -13,21 +13,24 @@
 #include<QCoreApplication>
 //自定义读取钩子函数
 int my_read_packet(void* opaque, uint8_t* buf, int buf_size) {
+    qDebug()<<"my_read_packet";
     VideoDataBuffer *vdb = (VideoDataBuffer*)opaque;
     int bytesLeft = vdb->getLength() - vdb->getReadPos();
+    qDebug()<<"bytesLeft"<<bytesLeft;
     while(bytesLeft <= 0){
         //Sleep(100);
         //qDebug()<<"sleep... len="<<vdb->getLength()<<"rp="<<vdb->getReadPos();
-        QCoreApplication::processEvents();
+        QCoreApplication::processEvents();  //处理网络IO消息，不然无法得到数据
         bytesLeft = vdb->getLength() - vdb->getReadPos();
     }
     qDebug()<<"length="<<vdb->getLength()<<" readpos="<<vdb->getReadPos()<<" buf_size="<<buf_size;
     size_t n = min(bytesLeft, buf_size);
     if (n <= 0) {
-        QMessageBox::information(nullptr,"info","eof");
+        qDebug()<<"eof";
         return AVERROR_EOF;
     }
     qint64 rn = vdb->read((char*)buf,n);
+    qDebug()<<"vdb->read"<<rn;
     if(rn == -1){
         qDebug()<<"vdb read err";
     }
@@ -48,7 +51,6 @@ int64_t my_seek(void* opaque, int64_t offset, int whence) {
         ret = vdb->getLength();
         break;
     case SEEK_SET:
-        QMessageBox::information(NULL,"sad","sek set");
         if(!vdb->read_seek(offset,whence)){
             printf("vdb seek fail");
             return -1;
@@ -80,6 +82,9 @@ int32_t x264Decoder::Open(VideoDataBuffer *vdb)
         printf("av_malloc err");
         exit(0);
     }
+    qDebug()<<"分配avioCtx缓冲区 finish";
+
+
     //分配一个avIOContext
     avIOContext = avio_alloc_context((unsigned char *)avIOCtxBuf,
         avIOCtxBufSize, 0, vdb, my_read_packet, NULL, my_seek);
@@ -87,11 +92,16 @@ int32_t x264Decoder::Open(VideoDataBuffer *vdb)
         printf("avio_alloc_context err");
         exit(0);
     }
+    qDebug()<<"avio_alloc_context finish";
+
+
     //分配FormatCtx
     m_pAvFormatCtx = avformat_alloc_context();
 
     //将avIOContext挂载到m_pAvFormatCtx的pb字段
     m_pAvFormatCtx->pb = avIOContext;
+    qDebug()<<"将avIOContext挂载到m_pAvFormatCtx的pb字段 finish";
+
     //打开流
     res = avformat_open_input(&m_pAvFormatCtx, nullptr, nullptr, nullptr);
     if (res < 0) {
@@ -100,7 +110,10 @@ int32_t x264Decoder::Open(VideoDataBuffer *vdb)
                 printf("%s", eStr);
         exit(0);
     }
-    QMessageBox::information(NULL,"asd","open input ret");
+    qDebug()<<"avformat_open_input finish";
+
+    //Qt中，不允许在非GUI线程中调用QMessageBox，这将造成程序崩溃
+    //QMessageBox::information(NULL,"asd","open input ret");
     //res = avformat_open_input(&m_pAvFormatCtx, pszFilePath, nullptr, nullptr);
     if (m_pAvFormatCtx == nullptr)
     {
@@ -111,6 +124,8 @@ int32_t x264Decoder::Open(VideoDataBuffer *vdb)
     }
     // 查找所有媒体流信息
     res = avformat_find_stream_info(m_pAvFormatCtx, nullptr);
+    qDebug()<<"avformat_find_stream_info finish";
+
     if (res == AVERROR_EOF)
     {
         LOGD("<Open> reached to file end\n");
@@ -158,7 +173,6 @@ int32_t x264Decoder::Open(VideoDataBuffer *vdb)
         printf("%s", eStr);
         QMessageBox::information(NULL,"aavf seek err",eStr);
     }*/
-    QMessageBox::information(NULL,"asd","avf seek");
     // 创建视频解码器并且打开
     if (pVidDecoder != nullptr)
     {
@@ -317,6 +331,11 @@ int32_t x264Decoder::Open(const char* pszFilePath)
 //
 // 关闭媒体文件，关闭对应的解码器
 //
+void IDecoder::init()
+{
+
+}
+
 void IDecoder::Close()
 {
 	// 关闭媒体文件解析
@@ -378,7 +397,48 @@ int32_t IDecoder::ReadFrame()
 		av_free_packet(pPacket);  // 数据包用完了可以释放了 
 	}
 	fclose(fp1);
-	return 0;
+    return 0;
+}
+
+int IDecoder::getWidth()
+{
+    return width;
+}
+
+int IDecoder::getHeight()
+{
+    return height;
+}
+
+bool IDecoder::getVideoFrame(AVFrame **pp_out_frame)
+{
+    int res = 0;
+
+    AVPacket* pPacket = (AVPacket * )av_malloc(sizeof(AVPacket));
+
+    // 依次读取数据包
+    res = av_read_frame(m_pAvFormatCtx, pPacket);
+    if (res == AVERROR_EOF)  // 正常读取到文件尾部退出
+    {
+        LOGE("<ReadFrame> reached media file end\n");
+        return false;
+    }
+    else if (res < 0) // 其他小于0的返回值是数据包读取错误
+    {
+        LOGE("<ReadFrame> fail av_read_frame(), res=%d\n", res);
+        return false;
+    }
+
+    if (pPacket->stream_index == m_nVidStreamIndex)       // 读取到视频包
+    {
+        // 这里进行视频包解码操作,详细下一章节讲解
+        if (decode(pPacket, pp_out_frame)) {
+            return true;
+        }
+    }
+    av_free_packet(pPacket);  // 数据包用完了可以释放了
+
+    return false;
 }
 
 bool IDecoder::decode(AVPacket *pkt,AVFrame** pp_out_frame)
@@ -468,7 +528,9 @@ x264Decoder::x264Decoder(const char* filename2)
 }
 x264Decoder::x264Decoder(VideoDataBuffer *vdb)
 {
+    qDebug()<<"x264Decoder(vdb) start";
     Open(vdb);
+    qDebug()<<"Open(vdb) ret";
 
     frame = av_frame_alloc();
     frameYUV = av_frame_alloc();
@@ -485,6 +547,7 @@ x264Decoder::x264Decoder(VideoDataBuffer *vdb)
 
 
     sws_ctx = sws_getContext(width, height, m_pVidDecodeCtx->pix_fmt, width, height, AV_PIX_FMT_YUV420P, SWS_BICUBIC, NULL, NULL, NULL);
+    qDebug()<<"sws_getContext ret";
 
     if (!sws_ctx) {
         printf("sws_getContext fail");

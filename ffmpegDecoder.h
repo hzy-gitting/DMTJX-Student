@@ -28,6 +28,10 @@ protected:
 public:
 	void Close();
 	int32_t ReadFrame();
+    int getWidth();
+    int getHeight();
+
+    bool getVideoFrame(AVFrame** pp_out_frame);
 	bool decode(AVPacket* pkt, AVFrame** pp_out_frame);
 	bool flush(AVFrame* frame);
 };

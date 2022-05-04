@@ -24,52 +24,28 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
-    bool MySystemShutDown();
     bool detectReply();
-public slots:
-    void readyread();
-    void newconn();
-    void tcpReadyread();
+
 private slots:
-    void on_bindButton_clicked();
-
-    void tcconn();
-    void rtcpReadyRead();
     void usdetreadyread();
-    void usVideoreadyread();
 
-    void rtcpError(QAbstractSocket::SocketError socketError);
     void on_commitFileBtn_clicked();
 
     void slotNewMessage();
 private:
     Ui::Widget *ui;
-    QUdpSocket *us,*usdet,*usVideo;
-    QTcpServer *tserv;
-    QTcpSocket *rtcpSkt;
+
+    QUdpSocket *usdet,*usVideo;
+
     NetworkMessageList *nm;
-
-    bool isReceiving;
-    qint64 fileSize;
-    qint64 bytesReceived;
-    QPixmap screen;
-
-    QTcpServer *rtcp;   //教学控制协议
-
-    FileReceiver *frcver;   //文件接收模块
 
     QHostAddress teacherAddr;//教师端ip
     int teacherPort;   //教师端端口
-    QFile f;
+
     void paintEvent(QPaintEvent *event) override;
     StuMsgWindow *smw;
 
     VideoDataBuffer vdb;    //视频数据缓冲区
-
-
-    //信号：接收到新消息
-signals:
-    void msgReceive(QString msg);
 
     // QWidget interface
 protected:

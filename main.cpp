@@ -4,7 +4,7 @@
 #include"rtcp.h"
 #include"networkmessagelist.h"
 #include<QMessageBox>
-
+#include<QThread>
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     QObject::connect(rtcp,&StudentNS::RTCP::sigNewMessage,
             nm,&NetworkMessageList::slotNewMessage);
 
+    qDebug()<<"主线程 "<<QThread::currentThread();
     Widget w;
     w.show();
     a.exec();

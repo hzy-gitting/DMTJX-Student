@@ -3,6 +3,9 @@
 #include<QMessageBox>
 #include"SDL.h"
 
+#include<QThread>
+#include"screensharethread.h"
+
 StudentNS::RTCP * StudentNS::RTCP::pInst = nullptr;
 
 StudentNS::RTCP::RTCP()
@@ -97,6 +100,11 @@ void StudentNS::RTCP::rtcpRDRD(){
     in >>cmd;   //读取命令字段
     in >> payload;  //读取数据体（负载）
     qDebug()<<"cmd="<<cmd;
+
+    static QThread *thread;
+    static ScreenShareThread *wt;
+
+
     if(!in.commitTransaction()){
         qDebug()<<"commitTransaction fail";
         return;
@@ -139,10 +147,29 @@ void StudentNS::RTCP::rtcpRDRD(){
         }
     }
     else if(cmd == "startScreenShare"){//屏幕共享开始
+        //读取视频缓存，提取数据包，解码h264 --> YUV帧,YUV数据给SDL线程渲染呈现
+
+        //启动屏幕共享线程
+        qInfo()<<"开始屏幕共享";
+        thread = new QThread();
+        wt = new ScreenShareThread;
+        wt->moveToThread(thread);
+        connect(this,&RTCP::startScreenShare,wt,&ScreenShareThread::start);
+        connect(this,&RTCP::stopScreenShare,thread,&QThread::quit);
+        thread->start();
+        emit startScreenShare();
+
 
     }
     else if(cmd == "stopScreenShare"){//屏幕共享结束
-        SDL_Quit();
+        //退出屏幕共享线程
+        thread->requestInterruption();
+        emit stopScreenShare();
+        thread->wait();
+        delete thread;
+        delete wt;
+
+        //SDL_Quit();
     }
     if(rtcpSocket->bytesAvailable()){
         rtcpRDRD();
